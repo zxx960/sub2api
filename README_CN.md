@@ -286,6 +286,30 @@ docker-compose -f docker-compose.local.yml logs -f sub2api
 docker-compose -f docker-compose.local.yml logs sub2api | grep "admin password"
 ```
 
+#### Zeabur 部署注意事项
+
+如果你是在 Zeabur 面板上部署 `sub2api`，并且 PostgreSQL、Redis 使用外部独立服务，请特别注意下面两个常见坑点：
+
+1. 持久化 `/app/data`
+   - 需要给 `sub2api` 服务挂载持久化硬盘到 `/app/data`
+   - 安装流程会把 `config.yaml` 和 `.installed` 写到这里
+   - 如果这个目录没有持久化，服务重启或重新部署后，可能又回到安装向导
+   - 如果必须挂到别的目录，请同时显式设置 `DATA_DIR=你的挂载目录`
+
+2. 显式设置 `SERVER_PORT=8080`
+   - 在 Zeabur 上通常通过 HTTPS 域名访问安装向导，前端看到的外部端口可能是 `443`
+   - 安装流程可能把这个外部端口写进 `server.port`
+   - 这会导致容器内服务在 Zeabur 代理后面启动异常，表现为安装完成后出现 `502 Bad Gateway`
+   - 建议在 Zeabur 的环境变量中固定设置 `SERVER_PORT=8080`
+
+推荐的 Zeabur 配置：
+
+```text
+挂载目录：/app/data
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8080
+```
+
 #### 升级
 
 ```bash

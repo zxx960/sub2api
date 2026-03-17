@@ -275,6 +275,30 @@ If admin password was auto-generated, find it in logs:
 docker-compose -f docker-compose.local.yml logs sub2api | grep "admin password"
 ```
 
+#### Zeabur Deployment Notes
+
+If you deploy `sub2api` from the Zeabur panel and use external PostgreSQL/Redis services, watch for these two common pitfalls:
+
+1. Persist `/app/data`
+   - Mount a persistent volume to `/app/data`
+   - The setup flow writes `config.yaml` and `.installed` there
+   - If that directory is not persisted, the service may return to the setup wizard after restart or redeploy
+   - If you use a different mount path, also set `DATA_DIR` to that path
+
+2. Set `SERVER_PORT=8080`
+   - On Zeabur, the setup wizard is usually opened via an HTTPS domain, so the browser-facing port may appear as `443`
+   - The setup flow may save that external port into `server.port`
+   - That can break service startup behind Zeabur's proxy and show up as `502 Bad Gateway` after installation
+   - Set `SERVER_PORT=8080` explicitly in Zeabur environment variables
+
+Recommended Zeabur settings:
+
+```text
+Volume mount path: /app/data
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8080
+```
+
 #### Upgrade
 
 ```bash

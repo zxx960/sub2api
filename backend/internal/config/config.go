@@ -1146,8 +1146,8 @@ func setDefaults() {
 	viper.SetDefault("log.sampling.thereafter", 100)
 
 	// CORS
-	viper.SetDefault("cors.allowed_origins", []string{})
-	viper.SetDefault("cors.allow_credentials", true)
+	viper.SetDefault("cors.allowed_origins", []string{"*"})
+	viper.SetDefault("cors.allow_credentials", false)
 
 	// Security
 	viper.SetDefault("security.url_allowlist.enabled", false)
